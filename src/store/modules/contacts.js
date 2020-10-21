@@ -60,6 +60,7 @@ const getters = {
     allContacts: (state) => state.contacts,
     getContactById: (state) => (id) => state.contacts.find(x => x.id === id)
 };
+
 const actions = {
     async addContact({ commit }, name) { commit('addContact', name) },
     async deleteContact({ commit }, id) { commit('deleteContact', id) },
