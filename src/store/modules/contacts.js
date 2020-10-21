@@ -8,17 +8,49 @@ const state = {
                     name: "Email",
                     value: "example@gmail.com",
                     id: 1
-                }, {
+                },
+                {
                     name: 'Phone',
                     value: "+386666666",
                     id: 2
+                },
+                {
+                    name: "Country",
+                    value: "Poland",
+                    id: 2
+                },
+                {
+                    name: "City",
+                    value: "Warsaw",
+                    id: 3
                 }
             ]
         },
         {
             id: 2,
             name: 'Donald Trump',
-            info: []
+            info: [
+                {
+                    name: "Email",
+                    value: "example@gmail.com",
+                    id: 1
+                },
+                {
+                    name: 'Phone',
+                    value: "1111111",
+                    id: 2
+                },
+                {
+                    name: "Country",
+                    value: "USA",
+                    id: 2
+                },
+                {
+                    name: "City",
+                    value: "New York",
+                    id: 3
+                }
+            ]
         },
     ],
     backUp: []
@@ -77,9 +109,9 @@ const mutations = {
     updateInfo: (state, { contractId, infoId, name, value }) => {
         const index = state.contacts.findIndex(x => x.id === contractId);
         const indexInfo = state.contacts[index].info.findIndex(x => x.id === infoId);
-        
+
         state.backUp = JSON.parse(JSON.stringify(state.contacts));
-        
+
         state.contacts[index].info[indexInfo] = {
             id: state.contacts[index].info[indexInfo].id,
             name: name,

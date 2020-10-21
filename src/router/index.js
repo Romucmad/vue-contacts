@@ -17,12 +17,9 @@ export default new Router({
             path: '/contacts/:id',
             name: 'contacts',
             component: ViwContact,
-
             props: (route) => {
                 const id = Number.parseInt(route.params.id, 10)
-                if (Number.isNaN(id)) {
-                    return 0
-                }
+                if (Number.isNaN(id)) return 0
                 return { id }
             }
 

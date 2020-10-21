@@ -1,14 +1,19 @@
 <template>
   <div class="vieContact">
     <div v-if="contact" class="container">
+      <!-- Delete modal -->
       <modal
         title="Deletion"
         message="Do you want to delete record ?"
-        :name="currentDeletename"
-        @close="modalOpened = false"
+        :name="deleteModal.currentDeleteName"
+        @close="deleteModal.modalOpened = false"
         @callback="deleteInfo"
-        v-if="modalOpened"
+        v-if="deleteModal.modalOpened"
       />
+      <!-- Delete modal -->
+
+      <!-- Edit modal -->
+
       <modal
         title="Editing"
         message="Do you want to revert changes ?"
@@ -17,37 +22,60 @@
         @callback="revertEdit"
         v-if="revertConfirmModal"
       />
+      <!-- Edit modal -->
+
+      <!-- Back button -->
       <div class="row btn__back">
         <button @click="$router.back()">
           <font-awesome-icon icon="arrow-left" />
           Back
         </button>
       </div>
+
+      <!-- Back button -->
+
+      <!-- Header and revert buutton -->
       <div class="row header__name">
         <h2>{{ contact.name }}</h2>
         <button @click="revert" style="float: right" class="action edit">
           <font-awesome-icon icon="undo" />
+          Undo
         </button>
       </div>
+      <!-- Header and revert buutton -->
+
+      <!-- Form to add info -->
       <div class="row text-center">
         <form v-on:submit.prevent="onSubmit" class="w-100 mt-2">
+          <!-- Add btn-->
           <input class="contact__input__submit" type="submit" value="Add" />
+          <!-- Add btn-->
+
           <div class="contact__input__name">
+            <!-- Name input-->
             <input
               class="contact__input__key"
               v-model="name"
               type="text"
               placeholder="Name"
             />
+            <!-- Name input-->
+
+            <!-- Value input-->
             <input
               class="contact__input__value"
               v-model="value"
               type="text"
               placeholder="Value"
             />
+            <!-- Value input-->
           </div>
         </form>
       </div>
+      <!-- Form to add info -->
+
+      <!-- Table with values -->
+
       <div class="row text-center mt-2">
         <table>
           <tr>
@@ -55,39 +83,63 @@
             <th>Value</th>
             <th>Actions</th>
           </tr>
+          <!-- V-for items -->
           <tr v-for="item in contact.info" v-bind:key="item.id">
-            <td v-if="item.id === editRowId">
-              <input class="edit__input" v-model="editRowName" />
+            <!-- Edit mode name-->
+            <td v-if="item.id === editModal.editRowId">
+              <input class="edit__input" v-model="editModal.editRowName" />
             </td>
-            <td v-else>{{ item.name }}</td>
+            <!-- Edit mode name -->
 
-            <td v-if="item.id === editRowId">
-              <input class="edit__input" v-model="editRowValue" />
+            <!-- Read mode name -->
+            <td v-else>{{ item.name }}</td>
+            <!-- Read mode name -->
+
+            <!-- Edit mode value-->
+            <td v-if="item.id === editModal.editRowId">
+              <input class="edit__input" v-model="editModal.editRowValue" />
             </td>
+            <!-- Edit mode value-->
+
+            <!-- Read mode value-->
             <td v-else>{{ item.value }}</td>
+            <!-- Read mode value-->
 
             <td>
-              <div v-if="item.id === editRowId">
+              <!-- Edit mode actions-->
+
+              <div v-if="item.id === editModal.editRowId">
                 <button @click="save" class="action edit">
                   <font-awesome-icon icon="save" />
+                  Save
                 </button>
                 <button @click="revertConfirmModal = true" class="action edit">
                   <font-awesome-icon icon="undo" />
+                  Undo
                 </button>
               </div>
+              <!-- Edit mode actions-->
+
+              <!-- Read mode actions-->
+
               <div v-else>
                 <button @click="editRow(item.id)" class="action edit">
                   <font-awesome-icon icon="edit" />
+                  Edit
                 </button>
 
-                <button @click="deleteClicked(item.id)" class="action trash">
+                <button @click="openDeleteModal(item.id)" class="action trash">
                   <font-awesome-icon icon="trash" />
+                  Delete
                 </button>
               </div>
+              <!-- Read mode actions-->
             </td>
           </tr>
+          <!-- V-for items -->
         </table>
       </div>
+      <!-- Table with values -->
     </div>
   </div>
 </template>
@@ -106,62 +158,73 @@ export default {
     return {
       name: "",
       value: "",
-      modalOpened: false,
-      currentDeleteName: "",
-      currentDeleteId: undefined,
-      editRowId: undefined,
-      editRowName: "",
-      editRowValue: "",
       revertConfirmModal: false,
+
+      editModal: {
+        editRowId: undefined,
+        editRowName: "",
+        editRowValue: "",
+      },
+      deleteModal: {
+        modalOpened: false,
+        currentDeleteName: "",
+        currentDeleteId: undefined,
+      },
     };
-  },
-  watch: {
-    editRowId(val) {
-      console.log(val);
-    },
   },
   methods: {
     ...mapActions(["addInfo", "removeInfo", "updateInfo", "revert"]),
     onSubmit() {
-      this.addInfo({
-        id: this.id,
-        name: this.name,
-        value: this.value,
-      });
-      this.name = "";
-      this.value = "";
-    },
-    revertEdit() {
-      this.editRowId = undefined;
-    },
-    save() {
-      this.updateInfo({
-        contractId: this.id,
-        infoId: this.editRowId,
-        name: this.editRowName,
-        value: this.editRowValue,
-      });
-      this.editRowId = undefined;
-    },
-    editRow(infoId) {
-      if (this.editRowId === infoId) this.editRowId = undefined;
+      if (!this.name || !this.value) alert("One of the fields is empty");
       else {
-        this.editRowId = infoId;
-        const value = this.contact.info.find((x) => x.id === infoId);
-        this.editRowName = value.name;
-        this.editRowValue = value.value;
+        this.addInfo({
+          id: this.id,
+          name: this.name,
+          value: this.value,
+        });
+        this.name = "";
+        this.value = "";
       }
     },
-    deleteClicked(infoId) {
-      const value = this.contact.info.find((x) => x.id === infoId);
-      this.currentDeletename = `${value.name} - ${value.value}`;
-      this.modalOpened = true;
-      this.currentDeleteId = infoId;
+    revertEdit() {
+      //Disable edit mode
+      this.editModal.editRowId = undefined;
     },
+    save() {
+      // Updates edit
+      this.updateInfo({
+        contractId: this.id,
+        infoId: this.editModal.editRowId,
+        name: this.editModal.editRowName,
+        value: this.editModal.editRowValue,
+      });
+      this.editModal.editRowId = undefined;
+    },
+    // Enable edit mode
+    editRow(infoId) {
+      if (this.editModal.editRowId === infoId)
+        this.editModal.editRowId = undefined;
+      else {
+        this.editModal.editRowId = infoId;
+        const value = this.contact.info.find((x) => x.id === infoId);
+        this.editModal.editRowName = value.name;
+        this.editModal.editRowValue = value.value;
+      }
+    },
+    // Openes delete modal for confirm
+    openDeleteModal(infoId) {
+      const value = this.contact.info.find((x) => x.id === infoId);
+      this.deleteModal = {
+        modalOpened: true,
+        currentDeleteName: `${value.name} - ${value.value}`,
+        currentDeleteId: infoId,
+      };
+    },
+    //Callback from modal to be executed if YES
     deleteInfo() {
       this.removeInfo({
         contactId: this.id,
-        infoId: this.currentDeleteId,
+        infoId: this.deleteModal.currentDeleteId,
       });
     },
   },

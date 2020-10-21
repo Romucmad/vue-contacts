@@ -1,7 +1,18 @@
 <template>
   <div class="contact">
+    <!-- Modal -->
+    <modal
+      title="Deletion"
+      message="Do you want to delete record ?"
+      :name="currentDelete['currentDeleteName']"
+      @close="modalConfirm = false"
+      @callback="removeContact"
+      v-if="modalConfirm"
+    />
+    <!-- Modal -->
     <div class="container">
       <div class="row contact__add_create">
+        <!-- Add new contanct form -->
         <form v-on:submit.prevent="onSubmit">
           <input
             class="contact__input__submit"
@@ -13,22 +24,26 @@
             <input v-model="name" type="text" placeholder="Contact name" />
           </div>
         </form>
+        <!-- Add new contanct form -->
       </div>
       <div class="row">
         <div class="header_list">Contact list</div>
       </div>
       <div class="row mt-2">
+        <!-- Contact List -->
         <ul class="contact_list">
           <li v-for="contact in allContacts" v-bind:key="contact.id">
+            <!-- Name -->
             <router-link class="contact__link" :to="`contacts/${contact.id}`">
               {{ contact.name }}
             </router-link>
-
-            <button @click="removeContact(contact.id)" class="bad_btn">
+            <!-- Name -->
+            <button @click="callModalConfirm(contact.id)" class="bad__btn">
               Remove
             </button>
           </li>
         </ul>
+        <!-- Contact List -->
       </div>
     </div>
   </div>
@@ -36,28 +51,40 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import Modal from "./Modal.vue";
 
 export default {
   name: "contact",
+  components: {
+    Modal,
+  },
   data() {
     return {
       name: "",
+      modalConfirm: false,
+      currentDelete: {
+        currentDeleteName: "",
+        idToDelete: 0,
+      },
     };
   },
   methods: {
-    onSubmit: function () {
-      if (!this.name) {
-        alert("Field is empty");
-      } else {
-        this.addContact(this.name);
-        this.name = "";
-      }
-    },
     ...mapActions(["addContact", "deleteContact"]),
-    removeContact: function (id) {
+
+    onSubmit: function () {
+      if (!this.name) alert("Field is empty");
+      else this.addContact(this.name);
+      this.name = "";
+    },
+    callModalConfirm(id) {
+      // Fills currentDelete and opened modal
       const name = this.allContacts.find((x) => x.id == id).name;
-      const confirm = window.confirm(`Are you sure you want to detele ${name}`);
-      if (confirm) this.deleteContact(id);
+      this.currentDelete = { currentDeleteName: name, idToDelete: id };
+      this.modalConfirm = true;
+    },
+    removeContact: function () {
+      // Deletes contact from store
+      this.deleteContact(this.currentDelete.idToDelete);
     },
   },
   computed: mapGetters(["allContacts"]),
@@ -116,6 +143,11 @@ ul {
   transition: 0.33s;
 }
 
+.contact__input__name input:focus {
+  border: 2px solid #9cc88d;
+  transition: 0.33s;
+}
+
 .contact_list li {
   list-style-type: none;
   font-size: 1.5rem;
@@ -129,11 +161,7 @@ ul {
   margin: 0px 5px 0px 5px;
 }
 
-.good_btn {
-  background-color: green;
-}
-
-.bad_btn {
+.bad__btn {
   float: right;
   padding: 8px 20px;
   background-color: rgba(184, 15, 10, 0.85);
@@ -144,7 +172,7 @@ ul {
   border: 2px solid transparent;
 }
 
-.bad_btn:hover {
+.bad__btn:hover {
   cursor: pointer;
   transition: 0.3s;
   border: 2px solid rgba(184, 15, 10, 0.85);
@@ -168,10 +196,6 @@ ul {
   margin-top: 15vh;
 }
 
-.add_btn {
-  width: 100%;
-}
-
 .contact__link {
   outline: none;
   text-decoration: none;
@@ -180,7 +204,7 @@ ul {
 }
 
 .contact__link:hover {
-  color: #DB8C6D;
+  color:#0276FD	;
 }
 .mt-2 {
   margin-top: 2em;
