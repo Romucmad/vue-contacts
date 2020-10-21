@@ -77,7 +77,7 @@ const mutations = {
 
         //No ref backup
         state.backUp = JSON.parse(JSON.stringify(state.contacts));
-        return state.contacts.unshift({ id: maxId + 1, name: contact });
+        return state.contacts.unshift({ id: maxId + 1, name: contact, info: [] });
     },
     //Deletes contact by ID
     deleteContact: (state, id) => {
